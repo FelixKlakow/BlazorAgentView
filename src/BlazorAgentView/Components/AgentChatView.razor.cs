@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using BlazorAgentView.Models;
+using System.Text.RegularExpressions;
 
 namespace BlazorAgentView.Components;
 
@@ -16,9 +17,17 @@ public partial class AgentChatView : ComponentBase, IAsyncDisposable
     [Parameter] public RenderFragment<ToolCall>? ToolContentTemplate { get; set; }
 
     private List<ChatMessage> _messageList = new();
-    private ElementReference _containerRef;
     private ElementReference _messagesRef;
     private IJSObjectReference? _jsModule;
+
+    // Tracks the last `Messages` parameter reference we synced from. When the
+    // caller passes a new collection reference we re-seed `_messageList`; when
+    // they keep passing the same reference (e.g. a list they mutate themselves,
+    // or a SignalR-driven list) we leave imperative-mode state intact.
+    private IEnumerable<ChatMessage>? _lastSyncedMessages;
+    // Snapshot of messages count after the previous render so we can detect
+    // whether new content was added since the last paint.
+    private int _lastRenderedCount;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -42,19 +51,46 @@ public partial class AgentChatView : ComponentBase, IAsyncDisposable
                 // Component disposed before import completed.
             }
         }
-        await ScrollToBottomAsync();
+
+        var currentCount = _messageList.Count;
+        var grew = currentCount > _lastRenderedCount;
+        _lastRenderedCount = currentCount;
+
+        if (Options.AutoScroll && (firstRender || grew))
+        {
+            await ScrollToBottomAsync(force: firstRender);
+        }
     }
 
     protected override void OnParametersSet()
     {
-        _messageList = Messages.ToList();
+        // Only re-seed the internal list when the caller hands us a new
+        // collection reference. If they pass the same reference (mutating it
+        // in place or driving updates via the imperative API) we preserve any
+        // appended content / tool-state changes that imperative callers have
+        // already applied.
+        if (!ReferenceEquals(Messages, _lastSyncedMessages))
+        {
+            _messageList = Messages.ToList();
+            _lastSyncedMessages = Messages;
+            // Reset the rendered-count snapshot so the next render scrolls
+            // (the message set has changed wholesale).
+            _lastRenderedCount = 0;
+        }
     }
 
-    private async Task ScrollToBottomAsync()
+    private async Task ScrollToBottomAsync(bool force = false)
     {
         if (_jsModule is null) return;
         try
         {
+            // Skip scrolling when the user has scrolled up to read older
+            // messages (unless this is the initial render).
+            if (!force)
+            {
+                var nearBottom = await _jsModule.InvokeAsync<bool>("isNearBottom", _messagesRef);
+                if (!nearBottom) return;
+            }
             await _jsModule.InvokeVoidAsync("scrollToBottom", _messagesRef);
         }
         catch (JSDisconnectedException) { /* circuit gone */ }
@@ -95,12 +131,34 @@ public partial class AgentChatView : ComponentBase, IAsyncDisposable
 
     private string ThemeClass => Options.Theme != null ? $"bav-theme-{Options.Theme}" : string.Empty;
 
+    // Validate CSS custom-property names: must start with `--` and only contain
+    // ASCII letters, digits, hyphens or underscores. Disallow values containing
+    // `;`, newlines or `</` so callers can't smuggle in additional declarations
+    // or close the host element's style attribute.
+    private static readonly Regex _cssVarNameRegex = new(@"^--[A-Za-z0-9_-]+$", RegexOptions.Compiled);
+
+    private static bool IsSafeCssValue(string value)
+    {
+        if (string.IsNullOrEmpty(value)) return false;
+        foreach (var c in value)
+        {
+            if (c == ';' || c == '\r' || c == '\n' || c == '<' || c == '>' || c == '{' || c == '}' || c == '"' || c == '\'')
+                return false;
+        }
+        return true;
+    }
+
     private string CssVariableStyle
     {
         get
         {
             if (Options.CssVariables.Count == 0) return string.Empty;
-            return string.Join("; ", Options.CssVariables.Select(kv => $"{kv.Key}: {kv.Value}"));
+            var safe = Options.CssVariables
+                .Where(kv => kv.Key is not null
+                             && _cssVarNameRegex.IsMatch(kv.Key)
+                             && IsSafeCssValue(kv.Value))
+                .Select(kv => $"{kv.Key}: {kv.Value}");
+            return string.Join("; ", safe);
         }
     }
 

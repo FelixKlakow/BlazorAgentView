@@ -1,18 +1,21 @@
 <div class="bav-tool-call bav-tool-state-@(ToolCall.State.ToString().ToLower())">
-    <button type="button"
-            class="bav-tool-header"
-            aria-expanded="@_expanded.ToString().ToLower()"
-            aria-controls="@_bodyId"
-            @onclick="ToggleExpanded">
-        <span class="bav-tool-icon" aria-hidden="true">@GetStateIcon()</span>
-        <span class="bav-tool-name">@ToolCall.ToolName</span>
-        <span class="bav-tool-badge bav-tool-badge-@(ToolCall.State.ToString().ToLower())">@ToolCall.State</span>
+    <div class="bav-tool-header-row">
+        <button type="button"
+                class="bav-tool-header"
+                aria-expanded="@(_expanded ? "true" : "false")"
+                aria-controls="@_bodyId"
+                @onclick="ToggleExpanded">
+            <span class="bav-tool-icon" aria-hidden="true">@GetStateIcon()</span>
+            <span class="bav-tool-name">@ToolCall.ToolName</span>
+            <span class="bav-tool-badge bav-tool-badge-@(ToolCall.State.ToString().ToLower())">@ToolCall.State</span>
+            <span class="bav-tool-header-spacer"></span>
+            <span class="bav-expand-icon" aria-hidden="true">@(_expanded ? "▲" : "▼")</span>
+        </button>
         @if (OnCancelTool.HasDelegate && (ToolCall.State == ToolState.Pending || ToolCall.State == ToolState.Running))
         {
-            <button type="button" class="bav-tool-cancel-btn" @onclick:stopPropagation="true" @onclick="HandleCancel">⊗ Cancel</button>
+            <button type="button" class="bav-tool-cancel-btn" @onclick="HandleCancel">⊗ Cancel</button>
         }
-        <span class="bav-expand-icon" aria-hidden="true">@(_expanded ? "▲" : "▼")</span>
-    </button>
+    </div>
     @if (_expanded)
     {
         <div id="@_bodyId" class="bav-tool-body">

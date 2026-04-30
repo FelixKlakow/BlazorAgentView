@@ -29,7 +29,10 @@
 
     private AgentChatView? _chatView;
     private HubConnection? _hubConnection;
-    private List<ChatMessage> _messages = new();
+    // Authoritative list of messages. We always mutate this same instance so
+    // AgentChatView (which compares Messages by reference) keeps its internal
+    // state intact across re-renders of this component.
+    private readonly List<ChatMessage> _messages = new();
     private string? _connectionError;
     private bool _started;
 
@@ -49,10 +52,21 @@
         // Marshal every UI mutation through InvokeAsync so StateHasChanged runs
         // on the dispatcher and we never race against the renderer.
         _hubConnection.On<ChatMessage>(ReceiveMessageMethod, message =>
-            InvokeAsync(() => _chatView?.AddMessage(message)));
+            InvokeAsync(() =>
+            {
+                _messages.Add(message);
+                _chatView?.AddMessage(message);
+            }));
 
         _hubConnection.On<string, string>(AppendContentMethod, (messageId, text) =>
-            InvokeAsync(() => _chatView?.AppendToMessage(messageId, text)));
+            InvokeAsync(() =>
+            {
+                // _messages and _chatView's internal list share the same
+                // ChatMessage instances (AgentChatView does a shallow copy),
+                // so mutating one in place is reflected in both. We still
+                // call the imperative API to trigger a re-render.
+                _chatView?.AppendToMessage(messageId, text);
+            }));
 
         _hubConnection.On<string, string, ToolState, string?>(UpdateToolMethod, (messageId, toolCallId, state, output) =>
             InvokeAsync(() => _chatView?.UpdateToolState(messageId, toolCallId, state, output)));

@@ -146,22 +146,30 @@
   font-size: 0.875rem;
 }
 
+.bav-tool-header-row {
+  display: flex;
+  align-items: stretch;
+  background: var(--bav-surface);
+}
+
+.bav-tool-header-row:hover { background: var(--bav-border); }
+
 .bav-tool-header {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: calc(var(--bav-spacing) / 2);
   padding: var(--bav-spacing) calc(var(--bav-spacing) * 1.5);
   cursor: pointer;
-  background: var(--bav-surface);
+  background: transparent;
   user-select: none;
-  width: 100%;
   border: 0;
   font: inherit;
   color: inherit;
   text-align: left;
 }
 
-.bav-tool-header:hover { background: var(--bav-border); }
+.bav-tool-header-spacer { flex: 1; }
 .bav-tool-header:focus-visible { outline: 2px solid var(--bav-accent); outline-offset: -2px; }
 
 .bav-tool-icon { font-size: 1rem; }
@@ -183,6 +191,8 @@
 .bav-tool-badge-cancelled { background: var(--bav-tool-cancelled); }
 
 .bav-tool-cancel-btn {
+  align-self: center;
+  margin-right: calc(var(--bav-spacing) * 1.5);
   padding: 2px 8px;
   border: 1px solid var(--bav-tool-failed);
   background: transparent;
