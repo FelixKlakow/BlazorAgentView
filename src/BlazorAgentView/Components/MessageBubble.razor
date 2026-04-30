@@ -1,4 +1,4 @@
-@inject IMarkdownRenderer MarkdownRenderer
+@inject IServiceProvider Services
 
 <div class="bav-message bav-message-@(Message.Role.ToString().ToLower())">
     <div class="bav-message-header">
@@ -15,7 +15,7 @@
         }
         else if (Options.EnableMarkdown && !string.IsNullOrEmpty(Message.Content))
         {
-            <div class="bav-markdown-content">@MarkdownRenderer.Render(Message.Content)</div>
+            <div class="bav-markdown-content">@Renderer.Render(Message.Content)</div>
         }
         else if (!string.IsNullOrEmpty(Message.Content))
         {
@@ -36,10 +36,17 @@
 </div>
 
 @code {
+    // Shared fallback so consumers don't have to register IMarkdownRenderer
+    // unless they want to swap the implementation.
+    private static readonly DefaultMarkdownRenderer _defaultRenderer = new();
+
     [Parameter, EditorRequired] public ChatMessage Message { get; set; } = default!;
     [Parameter] public AgentChatOptions Options { get; set; } = new();
     [Parameter] public EventCallback<string> OnCancelTool { get; set; }
     [Parameter] public RenderFragment<ToolCall>? ToolContentTemplate { get; set; }
+
+    private IMarkdownRenderer Renderer =>
+        (IMarkdownRenderer?)Services.GetService(typeof(IMarkdownRenderer)) ?? _defaultRenderer;
 
     private string GetRoleLabel() => Message.Role switch
     {

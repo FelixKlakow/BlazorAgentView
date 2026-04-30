@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddSingleton<IMarkdownRenderer, DefaultMarkdownRenderer>();
+builder.Services.AddBlazorAgentView();
 
 var app = builder.Build();
 

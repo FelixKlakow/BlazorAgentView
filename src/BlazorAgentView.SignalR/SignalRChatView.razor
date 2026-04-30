@@ -27,32 +27,35 @@
     [Parameter] public string AppendContentMethod { get; set; } = AgentChatSignalRHub.AppendContent;
     [Parameter] public string UpdateToolMethod { get; set; } = AgentChatSignalRHub.UpdateTool;
 
-    private AgentChatView _chatView = default!;
+    private AgentChatView? _chatView;
     private HubConnection? _hubConnection;
     private List<ChatMessage> _messages = new();
     private string? _connectionError;
+    private bool _started;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Defer connection setup until the first render completes so that
+        // `_chatView` (@ref) is populated before any hub callback can fire.
+        if (!firstRender || _started) return;
+        _started = true;
+
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(HubUrl)
             .WithAutomaticReconnect()
             .Build();
 
+        // SignalR raises callbacks off the renderer's synchronization context.
+        // Marshal every UI mutation through InvokeAsync so StateHasChanged runs
+        // on the dispatcher and we never race against the renderer.
         _hubConnection.On<ChatMessage>(ReceiveMessageMethod, message =>
-        {
-            _chatView.AddMessage(message);
-        });
+            InvokeAsync(() => _chatView?.AddMessage(message)));
 
         _hubConnection.On<string, string>(AppendContentMethod, (messageId, text) =>
-        {
-            _chatView.AppendToMessage(messageId, text);
-        });
+            InvokeAsync(() => _chatView?.AppendToMessage(messageId, text)));
 
         _hubConnection.On<string, string, ToolState, string?>(UpdateToolMethod, (messageId, toolCallId, state, output) =>
-        {
-            _chatView.UpdateToolState(messageId, toolCallId, state, output);
-        });
+            InvokeAsync(() => _chatView?.UpdateToolState(messageId, toolCallId, state, output)));
 
         try
         {
@@ -61,6 +64,7 @@
         catch (Exception ex)
         {
             _connectionError = $"Failed to connect: {ex.Message}";
+            StateHasChanged();
         }
     }
 

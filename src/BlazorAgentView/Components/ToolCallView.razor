@@ -1,17 +1,21 @@
 <div class="bav-tool-call bav-tool-state-@(ToolCall.State.ToString().ToLower())">
-    <div class="bav-tool-header" @onclick="ToggleExpanded">
-        <span class="bav-tool-icon">@GetStateIcon()</span>
+    <button type="button"
+            class="bav-tool-header"
+            aria-expanded="@_expanded.ToString().ToLower()"
+            aria-controls="@_bodyId"
+            @onclick="ToggleExpanded">
+        <span class="bav-tool-icon" aria-hidden="true">@GetStateIcon()</span>
         <span class="bav-tool-name">@ToolCall.ToolName</span>
         <span class="bav-tool-badge bav-tool-badge-@(ToolCall.State.ToString().ToLower())">@ToolCall.State</span>
         @if (OnCancelTool.HasDelegate && (ToolCall.State == ToolState.Pending || ToolCall.State == ToolState.Running))
         {
-            <button class="bav-tool-cancel-btn" @onclick:stopPropagation="true" @onclick="HandleCancel">⊗ Cancel</button>
+            <button type="button" class="bav-tool-cancel-btn" @onclick:stopPropagation="true" @onclick="HandleCancel">⊗ Cancel</button>
         }
-        <span class="bav-expand-icon">@(_expanded ? "▲" : "▼")</span>
-    </div>
+        <span class="bav-expand-icon" aria-hidden="true">@(_expanded ? "▲" : "▼")</span>
+    </button>
     @if (_expanded)
     {
-        <div class="bav-tool-body">
+        <div id="@_bodyId" class="bav-tool-body">
             @if (ToolContentTemplate != null)
             {
                 @ToolContentTemplate(ToolCall)
@@ -47,6 +51,7 @@
     [Parameter] public RenderFragment<ToolCall>? ToolContentTemplate { get; set; }
 
     private bool _expanded = false;
+    private readonly string _bodyId = $"bav-tool-body-{Guid.NewGuid():N}";
 
     private void ToggleExpanded() => _expanded = !_expanded;
 

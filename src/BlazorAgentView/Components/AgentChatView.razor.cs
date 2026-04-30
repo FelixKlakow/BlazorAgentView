@@ -4,7 +4,7 @@ using BlazorAgentView.Models;
 
 namespace BlazorAgentView.Components;
 
-public partial class AgentChatView : ComponentBase
+public partial class AgentChatView : ComponentBase, IAsyncDisposable
 {
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
 
@@ -24,8 +24,23 @@ public partial class AgentChatView : ComponentBase
     {
         if (firstRender)
         {
-            _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
-                "import", "./_content/BlazorAgentView/blazor-agent-view.js");
+            try
+            {
+                _jsModule = await JSRuntime.InvokeAsync<IJSObjectReference>(
+                    "import", "./_content/BlazorAgentView/blazor-agent-view.js");
+            }
+            catch (JSDisconnectedException)
+            {
+                // Circuit gone (e.g. user navigated away) - safe to ignore.
+            }
+            catch (InvalidOperationException)
+            {
+                // JS interop is unavailable (e.g. during static SSR / prerender).
+            }
+            catch (TaskCanceledException)
+            {
+                // Component disposed before import completed.
+            }
         }
         await ScrollToBottomAsync();
     }
@@ -37,14 +52,14 @@ public partial class AgentChatView : ComponentBase
 
     private async Task ScrollToBottomAsync()
     {
-        if (_jsModule != null)
+        if (_jsModule is null) return;
+        try
         {
-            try
-            {
-                await _jsModule.InvokeVoidAsync("scrollToBottom", _messagesRef);
-            }
-            catch { /* ignore JS interop errors during prerender */ }
+            await _jsModule.InvokeVoidAsync("scrollToBottom", _messagesRef);
         }
+        catch (JSDisconnectedException) { /* circuit gone */ }
+        catch (InvalidOperationException) { /* JS unavailable */ }
+        catch (TaskCanceledException) { /* component disposed */ }
     }
 
     public void AddMessage(ChatMessage message)
@@ -87,5 +102,24 @@ public partial class AgentChatView : ComponentBase
             if (Options.CssVariables.Count == 0) return string.Empty;
             return string.Join("; ", Options.CssVariables.Select(kv => $"{kv.Key}: {kv.Value}"));
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_jsModule is not null)
+        {
+            try
+            {
+                await _jsModule.DisposeAsync();
+            }
+            catch (JSDisconnectedException) { /* circuit gone */ }
+            catch (InvalidOperationException) { /* JS unavailable */ }
+            catch (TaskCanceledException) { /* already cancelled */ }
+            finally
+            {
+                _jsModule = null;
+            }
+        }
+        GC.SuppressFinalize(this);
     }
 }
