@@ -106,12 +106,12 @@
   border-bottom-left-radius: 4px;
 }
 
-/* Borderless variant (default for assistant) */
+/* Borderless variant (default for assistant) – no bav-bubble base class applied */
 .bav-bubble-plain {
+  padding: 2px 0;
+  line-height: 1.55;
+  word-break: break-word;
   background: transparent;
-  box-shadow: none;
-  padding-left: 0;
-  padding-right: 0;
   color: var(--bav-text);
 }
 

@@ -90,20 +90,20 @@
             {
                 Role = MessageRole.User,
                 Content = "Hello! Can you search for the latest news about AI and then summarize it?",
-                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-5)
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-8)
             },
             new ChatMessage
             {
                 Role = MessageRole.Assistant,
                 Content = "Sure! Let me search for the latest AI news for you.",
-                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-4),
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-7),
                 ToolCalls = new List<ToolCall>
                 {
                     new ToolCall
                     {
                         ToolName = "web_search",
                         Input = """{"query": "latest AI news 2025", "max_results": 5}""",
-                        Output = """[{"title": "GPT-5 Released", "url": "...", "snippet": "OpenAI releases GPT-5..."}, {"title": "AI Regulation Update", "url": "...", "snippet": "New AI regulation frameworks..."}]""",
+                        Output = """[{"title": "GPT-5 Released", "snippet": "OpenAI releases GPT-5..."}, {"title": "AI Regulation Update", "snippet": "New AI regulation frameworks..."}]""",
                         State = ToolState.Success
                     }
                 }
@@ -111,33 +111,79 @@
             new ChatMessage
             {
                 Role = MessageRole.Assistant,
-                Content = "Here's a summary of the latest AI news:\n\n## Key Highlights\n\n1. **GPT-5 Released** &mdash; OpenAI released their latest model with significant improvements in reasoning and code generation.\n2. **AI Regulation Update** &mdash; New frameworks for AI regulation are being discussed globally.\n\n> The pace of AI development continues to accelerate in 2025.\n\n```python\n# Example AI code\nresponse = model.chat(\"Hello!\")\n```",
-                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-3)
+                Content = "Here's a summary of the latest AI news:\n\n## Key Highlights\n\n1. **GPT-5 Released** \u2014 OpenAI released their latest model with significant improvements in reasoning and code generation.\n2. **AI Regulation Update** \u2014 New frameworks for AI regulation are being discussed globally.\n\n> The pace of AI development continues to accelerate in 2025.\n\n```python\n# Example AI code\nresponse = model.chat(\"Hello!\")\n```",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-6)
             },
             new ChatMessage
             {
                 Role = MessageRole.User,
-                Content = "Can you run a failing tool to show me what that looks like?",
-                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-2)
+                Content = "Show me mixed tool display modes \u2014 some expanded, some header-only.",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-4)
             },
             new ChatMessage
             {
                 Role = MessageRole.Assistant,
-                Content = "Sure, here's what a failed and a pending tool call look like:",
-                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-1),
+                Content = "Here are several tool calls with different per-tool display modes, regardless of the global setting:",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-3),
                 ToolCalls = new List<ToolCall>
                 {
                     new ToolCall
                     {
-                        ToolName = "execute_code",
-                        Input = """{"language": "python", "code": "import sys; sys.exit(1)"}""",
-                        Output = "Error: Process exited with code 1",
-                        State = ToolState.Failed
+                        ToolName = "read_file",
+                        Input = """{"path": "src/main.py"}""",
+                        Output = "def main():\n    print(\"Hello, world!\")\n\nif __name__ == \"__main__\":\n    main()",
+                        State = ToolState.Success,
+                        DisplayMode = ToolCallDisplayMode.AlwaysExpanded
                     },
                     new ToolCall
                     {
-                        ToolName = "pending_tool",
-                        Input = """{"action": "waiting"}""",
+                        ToolName = "list_directory",
+                        Input = """{"path": "src/"}""",
+                        Output = "main.py  utils.py  models/  tests/",
+                        State = ToolState.Success,
+                        DisplayMode = ToolCallDisplayMode.HeaderOnly
+                    },
+                    new ToolCall
+                    {
+                        ToolName = "run_tests",
+                        Input = """{"suite": "unit", "verbose": true}""",
+                        Output = "Ran 42 tests in 1.23s\n\nOK",
+                        State = ToolState.Success,
+                        DisplayMode = ToolCallDisplayMode.CollapsibleExpanded
+                    },
+                    new ToolCall
+                    {
+                        ToolName = "deploy",
+                        Input = """{"env": "staging"}""",
+                        Output = "Error: insufficient permissions",
+                        State = ToolState.Failed,
+                        DisplayMode = ToolCallDisplayMode.AlwaysExpanded
+                    }
+                }
+            },
+            new ChatMessage
+            {
+                Role = MessageRole.User,
+                Content = "What does a pending/running tool look like?",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-1)
+            },
+            new ChatMessage
+            {
+                Role = MessageRole.Assistant,
+                Content = "Here are the active states \u2014 you can cancel the pending one:",
+                Timestamp = DateTimeOffset.UtcNow,
+                ToolCalls = new List<ToolCall>
+                {
+                    new ToolCall
+                    {
+                        ToolName = "long_running_job",
+                        Input = """{"task": "data_processing", "records": 50000}""",
+                        State = ToolState.Running
+                    },
+                    new ToolCall
+                    {
+                        ToolName = "queued_task",
+                        Input = """{"priority": "normal"}""",
                         State = ToolState.Pending
                     }
                 }

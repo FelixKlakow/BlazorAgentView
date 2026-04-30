@@ -51,7 +51,7 @@
     private bool IsAssistant => Message.Role == MessageRole.Assistant;
 
     private string BubbleClass => (IsAssistant && !Options.EnableAssistantBubble)
-        ? "bav-bubble bav-bubble-plain"
+        ? "bav-bubble-plain"
         : "bav-bubble";
 
     private string GetRoleLabel() => Message.Role switch

@@ -93,13 +93,17 @@
     private bool? _userExpanded;
     private readonly string _bodyId = $"bav-tool-body-{Guid.NewGuid():N}";
 
-    private bool IsToggleable => Options.ToolCallDisplay is ToolCallDisplayMode.Collapsible
-                                                          or ToolCallDisplayMode.CollapsibleExpanded;
+    // Per-tool DisplayMode takes precedence over the global option.
+    private ToolCallDisplayMode EffectiveDisplay =>
+        ToolCall.DisplayMode ?? Options.ToolCallDisplay;
 
-    private bool DefaultExpanded => Options.ToolCallDisplay is ToolCallDisplayMode.CollapsibleExpanded
-                                                            or ToolCallDisplayMode.AlwaysExpanded;
+    private bool IsToggleable => EffectiveDisplay is ToolCallDisplayMode.Collapsible
+                                                   or ToolCallDisplayMode.CollapsibleExpanded;
 
-    private bool IsExpanded => Options.ToolCallDisplay switch
+    private bool DefaultExpanded => EffectiveDisplay is ToolCallDisplayMode.CollapsibleExpanded
+                                                      or ToolCallDisplayMode.AlwaysExpanded;
+
+    private bool IsExpanded => EffectiveDisplay switch
     {
         ToolCallDisplayMode.AlwaysExpanded => true,
         ToolCallDisplayMode.HeaderOnly => false,

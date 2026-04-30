@@ -10,4 +10,10 @@ public class ToolCall
     public string? Output { get; set; }
     public ToolState State { get; set; } = ToolState.Pending;
     public RenderFragment? CustomContent { get; set; }
+
+    /// <summary>
+    /// Optional per-tool display mode override. When set it takes precedence
+    /// over <see cref="AgentChatOptions.ToolCallDisplay"/>.
+    /// </summary>
+    public ToolCallDisplayMode? DisplayMode { get; set; }
 }
