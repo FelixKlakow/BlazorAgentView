@@ -1,0 +1,72 @@
+@using Microsoft.AspNetCore.SignalR.Client
+@using BlazorAgentView.Components
+@using BlazorAgentView.Models
+@implements IAsyncDisposable
+
+<AgentChatView @ref="_chatView"
+               Messages="_messages"
+               SystemPrompt="SystemPrompt"
+               Options="Options"
+               OnCancelTool="OnCancelTool"
+               ToolContentTemplate="ToolContentTemplate"
+               UserInputContent="UserInputContent" />
+
+@if (!string.IsNullOrEmpty(_connectionError))
+{
+    <div class="bav-connection-error">⚠ @_connectionError</div>
+}
+
+@code {
+    [Parameter, EditorRequired] public string HubUrl { get; set; } = string.Empty;
+    [Parameter] public string? SystemPrompt { get; set; }
+    [Parameter] public AgentChatOptions Options { get; set; } = new();
+    [Parameter] public EventCallback<string> OnCancelTool { get; set; }
+    [Parameter] public RenderFragment<ToolCall>? ToolContentTemplate { get; set; }
+    [Parameter] public RenderFragment? UserInputContent { get; set; }
+    [Parameter] public string ReceiveMessageMethod { get; set; } = AgentChatSignalRHub.ReceiveMessage;
+    [Parameter] public string AppendContentMethod { get; set; } = AgentChatSignalRHub.AppendContent;
+    [Parameter] public string UpdateToolMethod { get; set; } = AgentChatSignalRHub.UpdateTool;
+
+    private AgentChatView _chatView = default!;
+    private HubConnection? _hubConnection;
+    private List<ChatMessage> _messages = new();
+    private string? _connectionError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(HubUrl)
+            .WithAutomaticReconnect()
+            .Build();
+
+        _hubConnection.On<ChatMessage>(ReceiveMessageMethod, message =>
+        {
+            _chatView.AddMessage(message);
+        });
+
+        _hubConnection.On<string, string>(AppendContentMethod, (messageId, text) =>
+        {
+            _chatView.AppendToMessage(messageId, text);
+        });
+
+        _hubConnection.On<string, string, ToolState, string?>(UpdateToolMethod, (messageId, toolCallId, state, output) =>
+        {
+            _chatView.UpdateToolState(messageId, toolCallId, state, output);
+        });
+
+        try
+        {
+            await _hubConnection.StartAsync();
+        }
+        catch (Exception ex)
+        {
+            _connectionError = $"Failed to connect: {ex.Message}";
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection != null)
+            await _hubConnection.DisposeAsync();
+    }
+}

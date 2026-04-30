@@ -1,0 +1,52 @@
+@inject IMarkdownRenderer MarkdownRenderer
+
+<div class="bav-message bav-message-@(Message.Role.ToString().ToLower())">
+    <div class="bav-message-header">
+        <span class="bav-message-role">@GetRoleLabel()</span>
+        @if (Options.ShowTimestamps)
+        {
+            <span class="bav-message-timestamp">@Message.Timestamp.LocalDateTime.ToString("HH:mm")</span>
+        }
+    </div>
+    <div class="bav-bubble">
+        @if (Message.CustomContent != null)
+        {
+            @Message.CustomContent
+        }
+        else if (Options.EnableMarkdown && !string.IsNullOrEmpty(Message.Content))
+        {
+            <div class="bav-markdown-content">@MarkdownRenderer.Render(Message.Content)</div>
+        }
+        else if (!string.IsNullOrEmpty(Message.Content))
+        {
+            <div class="bav-text-content">@Message.Content</div>
+        }
+
+        @if (Message.IsStreaming)
+        {
+            <span class="bav-streaming-indicator">
+                <span class="bav-dot"></span><span class="bav-dot"></span><span class="bav-dot"></span>
+            </span>
+        }
+    </div>
+    @foreach (var toolCall in Message.ToolCalls)
+    {
+        <ToolCallView ToolCall="toolCall" OnCancelTool="OnCancelTool" ToolContentTemplate="ToolContentTemplate" />
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ChatMessage Message { get; set; } = default!;
+    [Parameter] public AgentChatOptions Options { get; set; } = new();
+    [Parameter] public EventCallback<string> OnCancelTool { get; set; }
+    [Parameter] public RenderFragment<ToolCall>? ToolContentTemplate { get; set; }
+
+    private string GetRoleLabel() => Message.Role switch
+    {
+        MessageRole.User => "You",
+        MessageRole.Assistant => "Agent",
+        MessageRole.System => "System",
+        MessageRole.Tool => "Tool",
+        _ => Message.Role.ToString()
+    };
+}

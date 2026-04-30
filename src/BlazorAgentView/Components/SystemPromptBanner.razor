@@ -1,0 +1,23 @@
+@if (!string.IsNullOrEmpty(SystemPrompt))
+{
+    <div class="bav-system-prompt-banner">
+        <button class="bav-system-prompt-toggle" @onclick="ToggleExpanded">
+            <span class="bav-system-prompt-label">⚙ System Prompt</span>
+            <span class="bav-expand-icon">@(_expanded ? "▲" : "▼")</span>
+        </button>
+        @if (_expanded)
+        {
+            <div class="bav-system-prompt-content">
+                <pre>@SystemPrompt</pre>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    [Parameter] public string? SystemPrompt { get; set; }
+
+    private bool _expanded = false;
+
+    private void ToggleExpanded() => _expanded = !_expanded;
+}

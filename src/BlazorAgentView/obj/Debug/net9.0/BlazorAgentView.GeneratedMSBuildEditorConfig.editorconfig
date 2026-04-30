@@ -1,0 +1,43 @@
+is_global = true
+build_property.TargetFramework = net9.0
+build_property.TargetFrameworkIdentifier = .NETCoreApp
+build_property.TargetFrameworkVersion = v9.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = 
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property.EnforceExtendedAnalyzerRules = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = BlazorAgentView
+build_property.RootNamespace = BlazorAgentView
+build_property.ProjectDir = /home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/
+build_property.EnableComHosting = 
+build_property.EnableGeneratedComInterfaceComImportInterop = 
+build_property.RazorLangVersion = 9.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = /home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView
+build_property._RazorSourceGeneratorDebug = 
+build_property.EffectiveAnalysisLevelStyle = 9.0
+build_property.EnableCodeStyleSeverity = 
+
+[/home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/Components/AgentChatView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9BZ2VudENoYXRWaWV3LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/Components/MessageBubble.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9NZXNzYWdlQnViYmxlLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/Components/SystemPromptBanner.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9TeXN0ZW1Qcm9tcHRCYW5uZXIucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/Components/ToolCallView.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50cy9Ub29sQ2FsbFZpZXcucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/_Imports.razor]
+build_metadata.AdditionalFiles.TargetPath = X0ltcG9ydHMucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 

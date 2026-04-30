@@ -1,0 +1,157 @@
+@page "/agent-demo"
+@rendermode InteractiveServer
+@using BlazorAgentView.Components
+@using BlazorAgentView.Models
+@using BlazorAgentView.Services
+@inject IMarkdownRenderer MarkdownRenderer
+
+<PageTitle>Agent Demo</PageTitle>
+
+<h1>BlazorAgentView Demo</h1>
+
+<div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
+    <label>Theme:</label>
+    <select @bind="_theme">
+        <option value="">Light (default)</option>
+        <option value="dark">Dark</option>
+    </select>
+    <label><input type="checkbox" @bind="_showTimestamps" /> Show timestamps</label>
+    <label><input type="checkbox" @bind="_enableMarkdown" /> Enable Markdown</label>
+    <button @onclick="SimulateStreaming" disabled="@_isStreaming">▶ Simulate Streaming</button>
+</div>
+
+<div style="height: 600px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden;">
+    <AgentChatView @ref="_chatView"
+                   Messages="_messages"
+                   SystemPrompt="@_systemPrompt"
+                   Options="_options"
+                   OnCancelTool="HandleCancel"
+                   UserInputContent="@UserInput">
+    </AgentChatView>
+</div>
+
+@code {
+    private AgentChatView _chatView = default!;
+    private List<ChatMessage> _messages = new();
+    private string _theme = "";
+    private bool _showTimestamps = true;
+    private bool _enableMarkdown = true;
+    private bool _isStreaming = false;
+
+    private string _systemPrompt = "You are a helpful AI assistant with access to tools. You can search the web, run code, and retrieve information.";
+
+    private AgentChatOptions _options => new AgentChatOptions
+    {
+        ShowTimestamps = _showTimestamps,
+        EnableMarkdown = _enableMarkdown,
+        Theme = string.IsNullOrEmpty(_theme) ? null : _theme
+    };
+
+    private RenderFragment UserInput => @<div style="display:flex; gap:8px; padding: 4px 0;">
+        <input class="form-control" placeholder="Type a message..." style="flex:1" />
+        <button class="btn btn-primary">Send</button>
+    </div>;
+
+    protected override void OnInitialized()
+    {
+        _messages = new List<ChatMessage>
+        {
+            new ChatMessage
+            {
+                Role = MessageRole.User,
+                Content = "Hello! Can you search for the latest news about AI and then summarize it?",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-5)
+            },
+            new ChatMessage
+            {
+                Role = MessageRole.Assistant,
+                Content = "Sure! Let me search for the latest AI news for you.",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-4),
+                ToolCalls = new List<ToolCall>
+                {
+                    new ToolCall
+                    {
+                        ToolName = "web_search",
+                        Input = """{"query": "latest AI news 2025", "max_results": 5}""",
+                        Output = """[{"title": "GPT-5 Released", "url": "...", "snippet": "OpenAI releases GPT-5..."}, {"title": "AI Regulation Update", "url": "...", "snippet": "New AI regulation frameworks..."}]""",
+                        State = ToolState.Success
+                    }
+                }
+            },
+            new ChatMessage
+            {
+                Role = MessageRole.Assistant,
+                Content = "Here's a summary of the latest AI news:\n\n## Key Highlights\n\n1. **GPT-5 Released** - OpenAI has released their latest model with significant improvements in reasoning and code generation.\n\n2. **AI Regulation Update** - New frameworks for AI regulation are being discussed globally.\n\n> The pace of AI development continues to accelerate in 2025.\n\n```python\n# Example AI code\nresponse = model.chat(\"Hello!\")\n```",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-3)
+            },
+            new ChatMessage
+            {
+                Role = MessageRole.User,
+                Content = "Can you run a failing tool to show me what that looks like?",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-2)
+            },
+            new ChatMessage
+            {
+                Role = MessageRole.Assistant,
+                Content = "Sure, here's what a failed tool call looks like:",
+                Timestamp = DateTimeOffset.UtcNow.AddMinutes(-1),
+                ToolCalls = new List<ToolCall>
+                {
+                    new ToolCall
+                    {
+                        ToolName = "execute_code",
+                        Input = """{"language": "python", "code": "import sys; sys.exit(1)"}""",
+                        Output = "Error: Process exited with code 1",
+                        State = ToolState.Failed
+                    },
+                    new ToolCall
+                    {
+                        ToolName = "pending_tool",
+                        Input = """{"action": "waiting"}""",
+                        State = ToolState.Pending
+                    }
+                }
+            }
+        };
+    }
+
+    private async Task SimulateStreaming()
+    {
+        _isStreaming = true;
+        var msg = new ChatMessage
+        {
+            Role = MessageRole.Assistant,
+            Content = "",
+            IsStreaming = true,
+            Timestamp = DateTimeOffset.UtcNow
+        };
+        _chatView.AddMessage(msg);
+
+        var text = "I'm streaming a response word by word. This demonstrates the streaming capability of the BlazorAgentView component! **Bold text** and *italics* work too.";
+        var words = text.Split(' ');
+
+        foreach (var word in words)
+        {
+            await Task.Delay(80);
+            _chatView.AppendToMessage(msg.Id, word + " ");
+        }
+
+        msg.IsStreaming = false;
+        _isStreaming = false;
+        StateHasChanged();
+    }
+
+    private Task HandleCancel(string toolCallId)
+    {
+        foreach (var msg in _messages)
+        {
+            var tool = msg.ToolCalls.FirstOrDefault(t => t.Id == toolCallId);
+            if (tool != null)
+            {
+                _chatView.UpdateToolState(msg.Id, toolCallId, ToolState.Cancelled);
+                break;
+            }
+        }
+        return Task.CompletedTask;
+    }
+}

@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "/home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/wwwroot/blazor-agent-view.css",
+      "PackagePath": "staticwebassets/blazor-agent-view.css"
+    },
+    {
+      "Id": "/home/runner/work/BlazorAgentView/BlazorAgentView/src/BlazorAgentView/wwwroot/blazor-agent-view.js",
+      "PackagePath": "staticwebassets/blazor-agent-view.js"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.BlazorAgentView.Microsoft.AspNetCore.StaticWebAssetEndpoints.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssetEndpoints.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.BlazorAgentView.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.build.BlazorAgentView.props",
+      "PackagePath": "build\\BlazorAgentView.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildMultiTargeting.BlazorAgentView.props",
+      "PackagePath": "buildMultiTargeting\\BlazorAgentView.props"
+    },
+    {
+      "Id": "obj/Debug/net9.0/staticwebassets/msbuild.buildTransitive.BlazorAgentView.props",
+      "PackagePath": "buildTransitive\\BlazorAgentView.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

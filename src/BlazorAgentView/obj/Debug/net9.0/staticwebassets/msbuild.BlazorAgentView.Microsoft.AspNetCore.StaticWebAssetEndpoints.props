@@ -1,0 +1,28 @@
+﻿<Project>
+  <ItemGroup>
+    <StaticWebAssetEndpoint Include="_content/BlazorAgentView/blazor-agent-view.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\blazor-agent-view.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-DGPIZhBIfHEsMDH0ML3iPoxwYZFq/j5CoL3OVbeXDbs="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"6864"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022DGPIZhBIfHEsMDH0ML3iPoxwYZFq/j5CoL3OVbeXDbs=\u0022"},{"Name":"Last-Modified","Value":"Thu, 30 Apr 2026 10:12:02 GMT"},{"Name":"Vary","Value":"Accept-Encoding"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/BlazorAgentView/blazor-agent-view.i25ga65xp5.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\blazor-agent-view.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"i25ga65xp5"},{"Name":"integrity","Value":"sha256-VtDlszvIW6O\u002BKN4XYiuh/iLwcuCQsFJFRyQTqh/83Uk="},{"Name":"label","Value":"_content/BlazorAgentView/blazor-agent-view.js"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"103"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022VtDlszvIW6O\u002BKN4XYiuh/iLwcuCQsFJFRyQTqh/83Uk=\u0022"},{"Name":"Last-Modified","Value":"Thu, 30 Apr 2026 10:11:22 GMT"},{"Name":"Vary","Value":"Accept-Encoding"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/BlazorAgentView/blazor-agent-view.js">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\blazor-agent-view.js'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"integrity","Value":"sha256-VtDlszvIW6O\u002BKN4XYiuh/iLwcuCQsFJFRyQTqh/83Uk="}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"no-cache"},{"Name":"Content-Length","Value":"103"},{"Name":"Content-Type","Value":"text/javascript"},{"Name":"ETag","Value":"\u0022VtDlszvIW6O\u002BKN4XYiuh/iLwcuCQsFJFRyQTqh/83Uk=\u0022"},{"Name":"Last-Modified","Value":"Thu, 30 Apr 2026 10:11:22 GMT"},{"Name":"Vary","Value":"Accept-Encoding"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+    <StaticWebAssetEndpoint Include="_content/BlazorAgentView/blazor-agent-view.w3cn6oun3s.css">
+      <AssetFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\staticwebassets\blazor-agent-view.css'))</AssetFile>
+      <Selectors><![CDATA[[]]]></Selectors>
+      <EndpointProperties><![CDATA[[{"Name":"fingerprint","Value":"w3cn6oun3s"},{"Name":"integrity","Value":"sha256-DGPIZhBIfHEsMDH0ML3iPoxwYZFq/j5CoL3OVbeXDbs="},{"Name":"label","Value":"_content/BlazorAgentView/blazor-agent-view.css"}]]]></EndpointProperties>
+      <ResponseHeaders><![CDATA[[{"Name":"Cache-Control","Value":"max-age=31536000, immutable"},{"Name":"Content-Length","Value":"6864"},{"Name":"Content-Type","Value":"text/css"},{"Name":"ETag","Value":"\u0022DGPIZhBIfHEsMDH0ML3iPoxwYZFq/j5CoL3OVbeXDbs=\u0022"},{"Name":"Last-Modified","Value":"Thu, 30 Apr 2026 10:12:02 GMT"},{"Name":"Vary","Value":"Accept-Encoding"}]]]></ResponseHeaders>
+    </StaticWebAssetEndpoint>
+  </ItemGroup>
+</Project>

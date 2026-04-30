@@ -1,0 +1,68 @@
+<div class="bav-tool-call bav-tool-state-@(ToolCall.State.ToString().ToLower())">
+    <div class="bav-tool-header" @onclick="ToggleExpanded">
+        <span class="bav-tool-icon">@GetStateIcon()</span>
+        <span class="bav-tool-name">@ToolCall.ToolName</span>
+        <span class="bav-tool-badge bav-tool-badge-@(ToolCall.State.ToString().ToLower())">@ToolCall.State</span>
+        @if (OnCancelTool.HasDelegate && (ToolCall.State == ToolState.Pending || ToolCall.State == ToolState.Running))
+        {
+            <button class="bav-tool-cancel-btn" @onclick:stopPropagation="true" @onclick="HandleCancel">⊗ Cancel</button>
+        }
+        <span class="bav-expand-icon">@(_expanded ? "▲" : "▼")</span>
+    </div>
+    @if (_expanded)
+    {
+        <div class="bav-tool-body">
+            @if (ToolContentTemplate != null)
+            {
+                @ToolContentTemplate(ToolCall)
+            }
+            else if (ToolCall.CustomContent != null)
+            {
+                @ToolCall.CustomContent
+            }
+            else
+            {
+                @if (!string.IsNullOrEmpty(ToolCall.Input))
+                {
+                    <div class="bav-tool-section">
+                        <div class="bav-tool-section-label">Input</div>
+                        <pre class="bav-tool-code">@ToolCall.Input</pre>
+                    </div>
+                }
+                @if (!string.IsNullOrEmpty(ToolCall.Output))
+                {
+                    <div class="bav-tool-section">
+                        <div class="bav-tool-section-label">Output</div>
+                        <pre class="bav-tool-code">@ToolCall.Output</pre>
+                    </div>
+                }
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public ToolCall ToolCall { get; set; } = default!;
+    [Parameter] public EventCallback<string> OnCancelTool { get; set; }
+    [Parameter] public RenderFragment<ToolCall>? ToolContentTemplate { get; set; }
+
+    private bool _expanded = false;
+
+    private void ToggleExpanded() => _expanded = !_expanded;
+
+    private async Task HandleCancel()
+    {
+        if (OnCancelTool.HasDelegate)
+            await OnCancelTool.InvokeAsync(ToolCall.Id);
+    }
+
+    private string GetStateIcon() => ToolCall.State switch
+    {
+        ToolState.Pending => "⏳",
+        ToolState.Running => "▶",
+        ToolState.Success => "✓",
+        ToolState.Failed => "✗",
+        ToolState.Cancelled => "⊘",
+        _ => "?"
+    };
+}
