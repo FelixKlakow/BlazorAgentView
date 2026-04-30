@@ -26,4 +26,10 @@ public class AgentChatOptions
     /// User messages always use a bubble.
     /// </summary>
     public bool EnableAssistantBubble { get; set; } = false;
+
+    /// <summary>
+    /// When <c>true</c> the system-prompt banner renders its text as Markdown.
+    /// Defaults to <c>false</c> (plain pre-formatted text).
+    /// </summary>
+    public bool SystemPromptMarkdown { get; set; } = false;
 }

@@ -55,9 +55,12 @@
     @if (IsExpanded)
     {
         <div id="@_bodyId" class="bav-tool-body">
-            @if (ToolContentTemplate != null)
+            @{
+                var customFragment = ToolContentTemplate?.Invoke(ToolCall);
+            }
+            @if (customFragment != null)
             {
-                @ToolContentTemplate(ToolCall)
+                @customFragment
             }
             else if (ToolCall.CustomContent != null)
             {

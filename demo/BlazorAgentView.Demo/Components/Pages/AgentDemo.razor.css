@@ -79,6 +79,43 @@
     }
 
     .agent-demo-btn:disabled {
+        opacity: 0.55;
+        cursor: default;
+    }
+
+/* ── Custom web_search tool renderer ─────────────────────────────────── */
+.demo-search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.demo-search-header {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #5b6472;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #e3e5ea;
+    margin-bottom: 2px;
+}
+
+.demo-search-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: #1f2328;
+    line-height: 1.45;
+}
+
+.demo-search-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: #5b6472;
+}
+    .agent-demo-btn:disabled {
         opacity: 0.6;
         cursor: default;
     }

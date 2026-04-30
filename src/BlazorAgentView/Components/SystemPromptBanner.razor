@@ -1,3 +1,5 @@
+@inject IServiceProvider Services
+
 @if (!string.IsNullOrEmpty(SystemPrompt))
 {
     <div class="bav-system-prompt-banner @(_expanded ? "bav-system-prompt-expanded" : null)">
@@ -18,14 +20,27 @@
         @if (_expanded)
         {
             <div id="@_contentId" class="bav-system-prompt-content">
-                <pre>@SystemPrompt</pre>
+                @if (Options.SystemPromptMarkdown)
+                {
+                    <div class="bav-markdown-content bav-system-prompt-markdown">@Renderer.Render(SystemPrompt)</div>
+                }
+                else
+                {
+                    <pre>@SystemPrompt</pre>
+                }
             </div>
         }
     </div>
 }
 
 @code {
+    private static readonly DefaultMarkdownRenderer _defaultRenderer = new();
+
     [Parameter] public string? SystemPrompt { get; set; }
+    [Parameter] public AgentChatOptions Options { get; set; } = new();
+
+    private IMarkdownRenderer Renderer =>
+        (IMarkdownRenderer?)Services.GetService(typeof(IMarkdownRenderer)) ?? _defaultRenderer;
 
     private bool _expanded = false;
     private readonly string _contentId = $"bav-system-prompt-{Guid.NewGuid():N}";
