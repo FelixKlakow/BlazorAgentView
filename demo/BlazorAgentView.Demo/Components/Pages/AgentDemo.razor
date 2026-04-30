@@ -5,28 +5,61 @@
 
 <PageTitle>Agent Demo</PageTitle>
 
-<h1>BlazorAgentView Demo</h1>
+<div class="agent-demo-page">
+    <header class="agent-demo-header">
+        <h1>BlazorAgentView</h1>
+        <p class="agent-demo-subtitle">Interactive demo &mdash; explore the chat surface, tool calls and theming.</p>
+    </header>
 
-<div style="margin-bottom: 16px; display: flex; gap: 8px; align-items: center;">
-    <label>Theme:</label>
-    <select @bind="_theme">
-        <option value="">Light (default)</option>
-        <option value="dark">Dark</option>
-    </select>
-    <label><input type="checkbox" @bind="_showTimestamps" /> Show timestamps</label>
-    <label><input type="checkbox" @bind="_enableMarkdown" /> Enable Markdown</label>
-    <button @onclick="SimulateStreaming" disabled="@_isStreaming">▶ Simulate Streaming</button>
+    <section class="agent-demo-toolbar" aria-label="Demo settings">
+        <div class="agent-demo-toolbar-group">
+            <label class="agent-demo-field">
+                <span>Theme</span>
+                <select @bind="_theme">
+                    <option value="">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </label>
+            <label class="agent-demo-field">
+                <span>Tool calls</span>
+                <select @bind="_toolDisplay">
+                    <option value="@ToolCallDisplayMode.Collapsible">Collapsible (closed)</option>
+                    <option value="@ToolCallDisplayMode.CollapsibleExpanded">Collapsible (open)</option>
+                    <option value="@ToolCallDisplayMode.AlwaysExpanded">Always expanded</option>
+                    <option value="@ToolCallDisplayMode.HeaderOnly">Header only</option>
+                </select>
+            </label>
+        </div>
+        <div class="agent-demo-toolbar-group">
+            <label class="agent-demo-toggle">
+                <input type="checkbox" @bind="_showTimestamps" />
+                <span>Timestamps</span>
+            </label>
+            <label class="agent-demo-toggle">
+                <input type="checkbox" @bind="_enableMarkdown" />
+                <span>Markdown</span>
+            </label>
+            <label class="agent-demo-toggle">
+                <input type="checkbox" @bind="_assistantBubble" />
+                <span>Agent bubble</span>
+            </label>
+            <button type="button" class="agent-demo-btn" @onclick="SimulateStreaming" disabled="@_isStreaming">
+                @(_isStreaming ? "Streaming…" : "Simulate streaming")
+            </button>
+        </div>
+    </section>
+
+    <div class="agent-demo-stage" style="height:640px;overflow:hidden;">
+        <AgentChatView @ref="_chatView"
+                       Messages="_messages"
+                       SystemPrompt="@_systemPrompt"
+                       Options="_options"
+                       OnCancelTool="HandleCancel">
+        </AgentChatView>
+    </div>
 </div>
 
-<div style="height: 600px; border: 1px solid #ccc; border-radius: 8px; overflow: hidden;">
-    <AgentChatView @ref="_chatView"
-                   Messages="_messages"
-                   SystemPrompt="@_systemPrompt"
-                   Options="_options"
-                   OnCancelTool="HandleCancel"
-                   UserInputContent="@UserInput">
-    </AgentChatView>
-</div>
+
 
 @code {
     private AgentChatView _chatView = default!;
@@ -35,6 +68,8 @@
     private bool _showTimestamps = true;
     private bool _enableMarkdown = true;
     private bool _isStreaming = false;
+    private bool _assistantBubble = false;
+    private ToolCallDisplayMode _toolDisplay = ToolCallDisplayMode.Collapsible;
 
     private string _systemPrompt = "You are a helpful AI assistant with access to tools. You can search the web, run code, and retrieve information.";
 
@@ -42,13 +77,10 @@
     {
         ShowTimestamps = _showTimestamps,
         EnableMarkdown = _enableMarkdown,
-        Theme = string.IsNullOrEmpty(_theme) ? null : _theme
+        Theme = string.IsNullOrEmpty(_theme) ? null : _theme,
+        ToolCallDisplay = _toolDisplay,
+        EnableAssistantBubble = _assistantBubble
     };
-
-    private RenderFragment UserInput => @<div style="display:flex; gap:8px; padding: 4px 0;">
-        <input class="form-control" placeholder="Type a message..." style="flex:1" />
-        <button class="btn btn-primary">Send</button>
-    </div>;
 
     protected override void OnInitialized()
     {
@@ -79,7 +111,7 @@
             new ChatMessage
             {
                 Role = MessageRole.Assistant,
-                Content = "Here's a summary of the latest AI news:\n\n## Key Highlights\n\n1. **GPT-5 Released** - OpenAI has released their latest model with significant improvements in reasoning and code generation.\n\n2. **AI Regulation Update** - New frameworks for AI regulation are being discussed globally.\n\n> The pace of AI development continues to accelerate in 2025.\n\n```python\n# Example AI code\nresponse = model.chat(\"Hello!\")\n```",
+                Content = "Here's a summary of the latest AI news:\n\n## Key Highlights\n\n1. **GPT-5 Released** &mdash; OpenAI released their latest model with significant improvements in reasoning and code generation.\n2. **AI Regulation Update** &mdash; New frameworks for AI regulation are being discussed globally.\n\n> The pace of AI development continues to accelerate in 2025.\n\n```python\n# Example AI code\nresponse = model.chat(\"Hello!\")\n```",
                 Timestamp = DateTimeOffset.UtcNow.AddMinutes(-3)
             },
             new ChatMessage
@@ -91,7 +123,7 @@
             new ChatMessage
             {
                 Role = MessageRole.Assistant,
-                Content = "Sure, here's what a failed tool call looks like:",
+                Content = "Sure, here's what a failed and a pending tool call look like:",
                 Timestamp = DateTimeOffset.UtcNow.AddMinutes(-1),
                 ToolCalls = new List<ToolCall>
                 {

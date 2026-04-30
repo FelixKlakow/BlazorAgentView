@@ -13,4 +13,17 @@ public class AgentChatOptions
     public bool AutoScroll { get; set; } = true;
     public string? Theme { get; set; }
     public Dictionary<string, string> CssVariables { get; set; } = new();
+
+    /// <summary>
+    /// Controls whether tool-call cards can be expanded/collapsed by the user
+    /// and what their initial state is. Defaults to <see cref="ToolCallDisplayMode.Collapsible"/>.
+    /// </summary>
+    public ToolCallDisplayMode ToolCallDisplay { get; set; } = ToolCallDisplayMode.Collapsible;
+
+    /// <summary>
+    /// When <c>false</c> (default) assistant messages are rendered as plain text without
+    /// a coloured bubble. Set to <c>true</c> to restore the bubble background.
+    /// User messages always use a bubble.
+    /// </summary>
+    public bool EnableAssistantBubble { get; set; } = false;
 }

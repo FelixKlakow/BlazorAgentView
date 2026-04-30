@@ -1,22 +1,58 @@
-<div class="bav-tool-call bav-tool-state-@(ToolCall.State.ToString().ToLower())">
+<div class="bav-tool-call bav-tool-state-@(ToolCall.State.ToString().ToLower()) @(IsExpanded ? "bav-tool-expanded" : null)">
     <div class="bav-tool-header-row">
-        <button type="button"
-                class="bav-tool-header"
-                aria-expanded="@(_expanded ? "true" : "false")"
-                aria-controls="@_bodyId"
-                @onclick="ToggleExpanded">
-            <span class="bav-tool-icon" aria-hidden="true">@GetStateIcon()</span>
-            <span class="bav-tool-name">@ToolCall.ToolName</span>
-            <span class="bav-tool-badge bav-tool-badge-@(ToolCall.State.ToString().ToLower())">@ToolCall.State</span>
-            <span class="bav-tool-header-spacer"></span>
-            <span class="bav-expand-icon" aria-hidden="true">@(_expanded ? "▲" : "▼")</span>
-        </button>
-        @if (OnCancelTool.HasDelegate && (ToolCall.State == ToolState.Pending || ToolCall.State == ToolState.Running))
+        @if (IsToggleable)
         {
-            <button type="button" class="bav-tool-cancel-btn" @onclick="HandleCancel">⊗ Cancel</button>
+            <button type="button"
+                    class="bav-tool-header"
+                    aria-expanded="@(IsExpanded ? "true" : "false")"
+                    aria-controls="@_bodyId"
+                    @onclick="ToggleExpanded">
+                <span class="bav-tool-icon-slot" aria-hidden="true">
+                    <ToolStateIndicator State="ToolCall.State" />
+                </span>
+                <span class="bav-tool-name">@ToolCall.ToolName</span>
+                <span class="bav-tool-header-spacer"></span>
+                @if (OnCancelTool.HasDelegate && IsCancellable)
+                {
+                    <span class="bav-tool-cancel"
+                          role="button"
+                          tabindex="0"
+                          aria-label="Cancel tool call"
+                          title="Cancel"
+                          @onclick="HandleCancel"
+                          @onclick:stopPropagation="true"
+                          @onkeydown="HandleCancelKey"
+                          @onkeydown:stopPropagation="true">
+                        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+                        </svg>
+                    </span>
+                }
+                <span class="bav-expand-chevron @(IsExpanded ? "bav-expand-chevron-open" : null)" aria-hidden="true">
+                    <svg viewBox="0 0 12 12" width="10" height="10"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </span>
+            </button>
+        }
+        else
+        {
+            <div class="bav-tool-header bav-tool-header-static">
+                <span class="bav-tool-icon-slot" aria-hidden="true">
+                    <ToolStateIndicator State="ToolCall.State" />
+                </span>
+                <span class="bav-tool-name">@ToolCall.ToolName</span>
+                <span class="bav-tool-header-spacer"></span>
+                @if (OnCancelTool.HasDelegate && IsCancellable)
+                {
+                    <button type="button" class="bav-tool-cancel" aria-label="Cancel tool call" title="Cancel" @onclick="HandleCancel">
+                        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+                            <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" />
+                        </svg>
+                    </button>
+                }
+            </div>
         }
     </div>
-    @if (_expanded)
+    @if (IsExpanded)
     {
         <div id="@_bodyId" class="bav-tool-body">
             @if (ToolContentTemplate != null)
@@ -52,11 +88,27 @@
     [Parameter, EditorRequired] public ToolCall ToolCall { get; set; } = default!;
     [Parameter] public EventCallback<string> OnCancelTool { get; set; }
     [Parameter] public RenderFragment<ToolCall>? ToolContentTemplate { get; set; }
+    [Parameter] public AgentChatOptions Options { get; set; } = new();
 
-    private bool _expanded = false;
+    private bool? _userExpanded;
     private readonly string _bodyId = $"bav-tool-body-{Guid.NewGuid():N}";
 
-    private void ToggleExpanded() => _expanded = !_expanded;
+    private bool IsToggleable => Options.ToolCallDisplay is ToolCallDisplayMode.Collapsible
+                                                          or ToolCallDisplayMode.CollapsibleExpanded;
+
+    private bool DefaultExpanded => Options.ToolCallDisplay is ToolCallDisplayMode.CollapsibleExpanded
+                                                            or ToolCallDisplayMode.AlwaysExpanded;
+
+    private bool IsExpanded => Options.ToolCallDisplay switch
+    {
+        ToolCallDisplayMode.AlwaysExpanded => true,
+        ToolCallDisplayMode.HeaderOnly => false,
+        _ => _userExpanded ?? DefaultExpanded,
+    };
+
+    private bool IsCancellable => ToolCall.State == ToolState.Pending || ToolCall.State == ToolState.Running;
+
+    private void ToggleExpanded() => _userExpanded = !IsExpanded;
 
     private async Task HandleCancel()
     {
@@ -64,13 +116,11 @@
             await OnCancelTool.InvokeAsync(ToolCall.Id);
     }
 
-    private string GetStateIcon() => ToolCall.State switch
+    private async Task HandleCancelKey(KeyboardEventArgs e)
     {
-        ToolState.Pending => "⏳",
-        ToolState.Running => "▶",
-        ToolState.Success => "✓",
-        ToolState.Failed => "✗",
-        ToolState.Cancelled => "⊘",
-        _ => "?"
-    };
+        if (e.Key is "Enter" or " ")
+        {
+            await HandleCancel();
+        }
+    }
 }

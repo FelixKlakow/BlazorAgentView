@@ -8,7 +8,7 @@
             <span class="bav-message-timestamp">@Message.Timestamp.LocalDateTime.ToString("HH:mm")</span>
         }
     </div>
-    <div class="bav-bubble">
+    <div class="@BubbleClass">
         @if (Message.CustomContent != null)
         {
             @Message.CustomContent
@@ -31,7 +31,7 @@
     </div>
     @foreach (var toolCall in Message.ToolCalls)
     {
-        <ToolCallView ToolCall="toolCall" OnCancelTool="OnCancelTool" ToolContentTemplate="ToolContentTemplate" />
+        <ToolCallView ToolCall="toolCall" OnCancelTool="OnCancelTool" ToolContentTemplate="ToolContentTemplate" Options="Options" />
     }
 </div>
 
@@ -47,6 +47,12 @@
 
     private IMarkdownRenderer Renderer =>
         (IMarkdownRenderer?)Services.GetService(typeof(IMarkdownRenderer)) ?? _defaultRenderer;
+
+    private bool IsAssistant => Message.Role == MessageRole.Assistant;
+
+    private string BubbleClass => (IsAssistant && !Options.EnableAssistantBubble)
+        ? "bav-bubble bav-bubble-plain"
+        : "bav-bubble";
 
     private string GetRoleLabel() => Message.Role switch
     {
