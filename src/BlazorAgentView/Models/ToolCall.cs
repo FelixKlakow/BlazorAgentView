@@ -22,4 +22,12 @@ public class ToolCall
     /// over <see cref="AgentChatOptions.ToolCallDisplay"/>.
     /// </summary>
     public ToolCallDisplayMode? DisplayMode { get; set; }
+
+    /// <summary>
+    /// Optional custom icon rendered on the right side of the tool card header as a
+    /// visual indicator of the tool type (e.g. a file, search, or code icon).
+    /// Render any SVG or HTML fragment here; it is displayed in a fixed 18×18 slot
+    /// after the spacer and before the cancel/chevron controls.
+    /// </summary>
+    public RenderFragment? Icon { get; set; }
 }

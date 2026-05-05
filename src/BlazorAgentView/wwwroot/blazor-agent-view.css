@@ -295,6 +295,17 @@
   flex: 0 0 18px;
 }
 
+.bav-tool-type-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  color: var(--bav-text-muted);
+  margin-right: 2px;
+}
+
 .bav-state-indicator {
   display: inline-flex;
   align-items: center;

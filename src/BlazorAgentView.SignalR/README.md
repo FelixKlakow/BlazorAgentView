@@ -174,6 +174,13 @@ app.MapHub<AgentHub>("/agent-hub");
 
 ---
 
+## Changelog
+
+### 1.0.0
+- Initial release: `AgentChatSignalRHub` constants (`ReceiveMessage`, `AppendContent`, `UpdateTool`) for wiring a SignalR hub to `<AgentChatView>`.
+
+---
+
 ## License
 
 MIT © Felix Klakow
