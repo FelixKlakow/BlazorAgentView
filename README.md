@@ -519,11 +519,8 @@ Options = new AgentChatOptions
 
 ## Changelog
 
-### 1.2.0
-- **Custom tool type icons** — `ToolCall.Icon` (`RenderFragment?`) renders a custom SVG/HTML icon on the right side of the tool card header as a visual type indicator for the tool call type.
-- **Bug fix** — system-prompt banner now correctly hides when `SystemPrompt` is `null` or `""` on `<AgentChatView>`.
-
 ### 1.1.0
+- **Custom tool type icons** — `ToolCall.Icon` (`RenderFragment?`) renders a custom SVG/HTML icon on the right side of the tool card header as a visual type indicator for the tool call type.
 - **`Subtitle` on `ToolCall`** — optional secondary text displayed next to the tool name for at-a-glance summaries (file path, search query, etc.).
 - **`ShowSystemPromptBanner` option** — hide the system-prompt banner independently via `AgentChatOptions.ShowSystemPromptBanner = false`.
 - **Per-tool `DisplayMode` override** — each `ToolCall` can now override the global `AgentChatOptions.ToolCallDisplay`.
