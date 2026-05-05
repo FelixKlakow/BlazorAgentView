@@ -274,6 +274,18 @@
   color: var(--bav-text);
 }
 
+.bav-tool-subtitle {
+  font-size: 0.8rem;
+  color: var(--bav-text-muted);
+  font-family: var(--bav-font-family);
+  font-weight: 400;
+  margin-left: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+
 .bav-tool-icon-slot {
   display: inline-flex;
   align-items: center;

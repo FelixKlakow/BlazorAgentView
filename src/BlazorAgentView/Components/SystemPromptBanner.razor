@@ -1,6 +1,6 @@
 @inject IServiceProvider Services
 
-@if (!string.IsNullOrEmpty(SystemPrompt))
+@if (Options.ShowSystemPromptBanner && !string.IsNullOrEmpty(SystemPrompt))
 {
     <div class="bav-system-prompt-banner @(_expanded ? "bav-system-prompt-expanded" : null)">
         <button type="button"

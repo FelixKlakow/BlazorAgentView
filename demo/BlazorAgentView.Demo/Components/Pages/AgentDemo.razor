@@ -43,6 +43,10 @@
                 <input type="checkbox" @bind="_assistantBubble" />
                 <span>Agent bubble</span>
             </label>
+            <label class="agent-demo-toggle">
+                <input type="checkbox" @bind="_showSystemPromptBanner" />
+                <span>System prompt banner</span>
+            </label>
             <button type="button" class="agent-demo-btn" @onclick="SimulateStreaming" disabled="@_isStreaming">
                 @(_isStreaming ? "Streaming…" : "Simulate streaming")
             </button>
@@ -70,6 +74,7 @@
     private bool _enableMarkdown = true;
     private bool _isStreaming = false;
     private bool _assistantBubble = false;
+    private bool _showSystemPromptBanner = true;
     private ToolCallDisplayMode _toolDisplay = ToolCallDisplayMode.Collapsible;
 
     private string _systemPrompt = "You are a helpful AI assistant with access to tools. You can search the web, run code, and retrieve information.";
@@ -80,7 +85,8 @@
         EnableMarkdown = _enableMarkdown,
         Theme = string.IsNullOrEmpty(_theme) ? null : _theme,
         ToolCallDisplay = _toolDisplay,
-        EnableAssistantBubble = _assistantBubble
+        EnableAssistantBubble = _assistantBubble,
+        ShowSystemPromptBanner = _showSystemPromptBanner
     };
 
     // Custom renderer: web_search gets a structured card; all others use the default.
@@ -176,6 +182,7 @@
                     new ToolCall
                     {
                         ToolName = "read_file",
+                        Subtitle = "src/main.py",
                         Input = """{"path": "src/main.py"}""",
                         Output = "def main():\n    print(\"Hello, world!\")\n\nif __name__ == \"__main__\":\n    main()",
                         State = ToolState.Success,
@@ -184,6 +191,7 @@
                     new ToolCall
                     {
                         ToolName = "list_directory",
+                        Subtitle = "src/",
                         Input = """{"path": "src/"}""",
                         Output = "main.py  utils.py  models/  tests/",
                         State = ToolState.Success,
@@ -192,6 +200,7 @@
                     new ToolCall
                     {
                         ToolName = "run_tests",
+                        Subtitle = "42 passed",
                         Input = """{"suite": "unit", "verbose": true}""",
                         Output = "Ran 42 tests in 1.23s\n\nOK",
                         State = ToolState.Success,
@@ -200,6 +209,7 @@
                     new ToolCall
                     {
                         ToolName = "deploy",
+                        Subtitle = "staging",
                         Input = """{"env": "staging"}""",
                         Output = "Error: insufficient permissions",
                         State = ToolState.Failed,

@@ -36,6 +36,8 @@ A Blazor component library for rendering AI agent chat interfaces with first-cla
 
 - 💬 **Chat bubbles** — user bubbles, borderless agent messages (GitHub Copilot-style), collapsible system-prompt banner
 - 🔧 **Tool call cards** — 4 display modes (collapsible, expanded, header-only, always-open), per-tool override, cancel button, animated state icons (pending / running / success / failed / cancelled)
+- 🏷️ **Tool subtitles** — optional secondary text rendered next to the tool name in a lighter style for a quick, at-a-glance summary (e.g. the file path or search query)
+- 🚫 **Hide system-prompt banner** — disable the banner independently via `ShowSystemPromptBanner = false` while keeping the `SystemPrompt` value available to your code
 - ✍️ **Markdown** — rendered via [Markdig](https://github.com/xoofx/markdig); fenced code blocks, tables, blockquotes, inline images — swappable via `IMarkdownRenderer`
 - 📡 **Streaming** — animated typing indicator; append tokens incrementally via `AppendToMessage`
 - 🌙 **Dark mode** — `Theme = "dark"` or customise every colour via CSS variables
@@ -109,6 +111,7 @@ Pass an `AgentChatOptions` instance to the `Options` parameter.
 | `ShowTimestamps` | `bool` | `true` | Show `HH:mm` in every message header. Overridable per message via `ChatMessage.ShowTimestamp`. |
 | `EnableMarkdown` | `bool` | `true` | Render message content as Markdown. |
 | `SystemPromptMarkdown` | `bool` | `false` | Render the system-prompt banner text as Markdown. |
+| `ShowSystemPromptBanner` | `bool` | `true` | Set to `false` to hide the system-prompt banner entirely, even when `SystemPrompt` is provided. |
 | `EnableAssistantBubble` | `bool` | `false` | `false` = borderless agent messages (default). `true` = coloured bubble. |
 | `AutoScroll` | `bool` | `true` | Scroll to bottom when new messages arrive. |
 | `EnableVirtualization` | `bool` | `false` | Virtualise the message list for long histories. |
@@ -124,6 +127,7 @@ Pass an `AgentChatOptions` instance to the `Options` parameter.
                    ShowTimestamps        = true,
                    EnableMarkdown        = true,
                    SystemPromptMarkdown  = true,
+                   ShowSystemPromptBanner = false,
                    EnableAssistantBubble = false,
                    ToolCallDisplay       = ToolCallDisplayMode.Collapsible,
                    Theme                 = "dark"
@@ -183,12 +187,21 @@ public class ToolCall
 {
     public string               Id            { get; set; }  // auto-generated
     public string               ToolName      { get; set; }
+    public string?              Subtitle      { get; set; }  // optional secondary text beside the tool name
     public string?              Input         { get; set; }
     public string?              Output        { get; set; }
     public ToolState            State         { get; set; }  // Pending | Running | Success | Failed | Cancelled
     public ToolCallDisplayMode? DisplayMode   { get; set; }  // per-tool override; null = global
     public RenderFragment?      CustomContent { get; set; }  // replaces default I/O rendering
 }
+```
+
+`Subtitle` is rendered next to the tool name with visual distance and a muted, lighter style — ideal for surfacing a brief, at-a-glance summary such as the file path, search query, or a key result:
+
+```csharp
+new ToolCall { ToolName = "read_file",      Subtitle = "src/main.py",  State = ToolState.Success }
+new ToolCall { ToolName = "web_search",     Subtitle = "latest AI news 2025", State = ToolState.Success }
+new ToolCall { ToolName = "run_tests",      Subtitle = "42 passed",    State = ToolState.Success }
 ```
 
 **`ToolState` values and their indicators:**
