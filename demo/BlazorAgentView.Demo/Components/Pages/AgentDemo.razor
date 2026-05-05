@@ -121,6 +121,22 @@
         };
     };
 
+    // Tool type icons
+    private RenderFragment SearchIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l3 3" /></svg>;
+
+    private RenderFragment FileIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M3 1h7l4 4v10H3V1z" /><path d="M10 1v4h4" /></svg>;
+
+    private RenderFragment FolderIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M1 4h5l2 2h7v8H1V4z" /></svg>;
+
+    private RenderFragment TestIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2h6" /><path d="M8 2v5l3 3" /><circle cx="8" cy="10" r="4" /></svg>;
+
+    private RenderFragment DeployIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1l3 5H5l3-5z" /><path d="M2 14h12" /><path d="M8 6v8" /></svg>;
+
     protected override void OnInitialized()
     {
         _messages = new List<ChatMessage>
@@ -142,9 +158,11 @@
                     {
                         // web_search uses the custom ToolContentTemplate renderer
                         ToolName = "web_search",
+                        Subtitle = "latest AI news 2025",
                         Input = """{"query": "latest AI news 2025", "max_results": 3}""",
                         Output = "GPT-5 Released — OpenAI releases flagship model\nAI Regulation Update — EU finalises AI Act enforcement\nOpen-Source LLMs — Llama 4 tops benchmarks",
-                        State = ToolState.Success
+                        State = ToolState.Success,
+                        Icon = SearchIcon
                     }
                 }
             },
@@ -183,6 +201,7 @@
                     {
                         ToolName = "read_file",
                         Subtitle = "src/main.py",
+                        Icon = FileIcon,
                         Input = """{"path": "src/main.py"}""",
                         Output = "def main():\n    print(\"Hello, world!\")\n\nif __name__ == \"__main__\":\n    main()",
                         State = ToolState.Success,
@@ -192,6 +211,7 @@
                     {
                         ToolName = "list_directory",
                         Subtitle = "src/",
+                        Icon = FolderIcon,
                         Input = """{"path": "src/"}""",
                         Output = "main.py  utils.py  models/  tests/",
                         State = ToolState.Success,
@@ -201,6 +221,7 @@
                     {
                         ToolName = "run_tests",
                         Subtitle = "42 passed",
+                        Icon = TestIcon,
                         Input = """{"suite": "unit", "verbose": true}""",
                         Output = "Ran 42 tests in 1.23s\n\nOK",
                         State = ToolState.Success,
@@ -210,6 +231,7 @@
                     {
                         ToolName = "deploy",
                         Subtitle = "staging",
+                        Icon = DeployIcon,
                         Input = """{"env": "staging"}""",
                         Output = "Error: insufficient permissions",
                         State = ToolState.Failed,
