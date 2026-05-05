@@ -11,7 +11,17 @@
                     <ToolStateIndicator State="ToolCall.State" />
                 </span>
                 <span class="bav-tool-name">@ToolCall.ToolName</span>
+                @if (!string.IsNullOrEmpty(ToolCall.Subtitle))
+                {
+                    <span class="bav-tool-subtitle">@ToolCall.Subtitle</span>
+                }
                 <span class="bav-tool-header-spacer"></span>
+                @if (ToolCall.Icon != null)
+                {
+                    <span class="bav-tool-type-icon" aria-hidden="true">
+                        @ToolCall.Icon
+                    </span>
+                }
                 @if (OnCancelTool.HasDelegate && IsCancellable)
                 {
                     <span class="bav-tool-cancel"
@@ -40,7 +50,17 @@
                     <ToolStateIndicator State="ToolCall.State" />
                 </span>
                 <span class="bav-tool-name">@ToolCall.ToolName</span>
+                @if (!string.IsNullOrEmpty(ToolCall.Subtitle))
+                {
+                    <span class="bav-tool-subtitle">@ToolCall.Subtitle</span>
+                }
                 <span class="bav-tool-header-spacer"></span>
+                @if (ToolCall.Icon != null)
+                {
+                    <span class="bav-tool-type-icon" aria-hidden="true">
+                        @ToolCall.Icon
+                    </span>
+                }
                 @if (OnCancelTool.HasDelegate && IsCancellable)
                 {
                     <button type="button" class="bav-tool-cancel" aria-label="Cancel tool call" title="Cancel" @onclick="HandleCancel">

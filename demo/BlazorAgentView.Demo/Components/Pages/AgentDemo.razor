@@ -43,6 +43,10 @@
                 <input type="checkbox" @bind="_assistantBubble" />
                 <span>Agent bubble</span>
             </label>
+            <label class="agent-demo-toggle">
+                <input type="checkbox" @bind="_showSystemPromptBanner" />
+                <span>System prompt banner</span>
+            </label>
             <button type="button" class="agent-demo-btn" @onclick="SimulateStreaming" disabled="@_isStreaming">
                 @(_isStreaming ? "Streaming…" : "Simulate streaming")
             </button>
@@ -70,6 +74,7 @@
     private bool _enableMarkdown = true;
     private bool _isStreaming = false;
     private bool _assistantBubble = false;
+    private bool _showSystemPromptBanner = true;
     private ToolCallDisplayMode _toolDisplay = ToolCallDisplayMode.Collapsible;
 
     private string _systemPrompt = "You are a helpful AI assistant with access to tools. You can search the web, run code, and retrieve information.";
@@ -80,7 +85,8 @@
         EnableMarkdown = _enableMarkdown,
         Theme = string.IsNullOrEmpty(_theme) ? null : _theme,
         ToolCallDisplay = _toolDisplay,
-        EnableAssistantBubble = _assistantBubble
+        EnableAssistantBubble = _assistantBubble,
+        ShowSystemPromptBanner = _showSystemPromptBanner
     };
 
     // Custom renderer: web_search gets a structured card; all others use the default.
@@ -115,6 +121,22 @@
         };
     };
 
+    // Tool type icons
+    private RenderFragment SearchIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4" /><path d="M11 11l3 3" /></svg>;
+
+    private RenderFragment FileIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M3 1h7l4 4v10H3V1z" /><path d="M10 1v4h4" /></svg>;
+
+    private RenderFragment FolderIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" aria-hidden="true"><path d="M1 4h5l2 2h7v8H1V4z" /></svg>;
+
+    private RenderFragment TestIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 2h6" /><path d="M8 2v5l3 3" /><circle cx="8" cy="10" r="4" /></svg>;
+
+    private RenderFragment DeployIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 1l3 5H5l3-5z" /><path d="M2 14h12" /><path d="M8 6v8" /></svg>;
+
     protected override void OnInitialized()
     {
         _messages = new List<ChatMessage>
@@ -136,9 +158,11 @@
                     {
                         // web_search uses the custom ToolContentTemplate renderer
                         ToolName = "web_search",
+                        Subtitle = "latest AI news 2025",
                         Input = """{"query": "latest AI news 2025", "max_results": 3}""",
                         Output = "GPT-5 Released — OpenAI releases flagship model\nAI Regulation Update — EU finalises AI Act enforcement\nOpen-Source LLMs — Llama 4 tops benchmarks",
-                        State = ToolState.Success
+                        State = ToolState.Success,
+                        Icon = SearchIcon
                     }
                 }
             },
@@ -176,6 +200,8 @@
                     new ToolCall
                     {
                         ToolName = "read_file",
+                        Subtitle = "src/main.py",
+                        Icon = FileIcon,
                         Input = """{"path": "src/main.py"}""",
                         Output = "def main():\n    print(\"Hello, world!\")\n\nif __name__ == \"__main__\":\n    main()",
                         State = ToolState.Success,
@@ -184,6 +210,8 @@
                     new ToolCall
                     {
                         ToolName = "list_directory",
+                        Subtitle = "src/",
+                        Icon = FolderIcon,
                         Input = """{"path": "src/"}""",
                         Output = "main.py  utils.py  models/  tests/",
                         State = ToolState.Success,
@@ -192,6 +220,8 @@
                     new ToolCall
                     {
                         ToolName = "run_tests",
+                        Subtitle = "42 passed",
+                        Icon = TestIcon,
                         Input = """{"suite": "unit", "verbose": true}""",
                         Output = "Ran 42 tests in 1.23s\n\nOK",
                         State = ToolState.Success,
@@ -200,6 +230,8 @@
                     new ToolCall
                     {
                         ToolName = "deploy",
+                        Subtitle = "staging",
+                        Icon = DeployIcon,
                         Input = """{"env": "staging"}""",
                         Output = "Error: insufficient permissions",
                         State = ToolState.Failed,

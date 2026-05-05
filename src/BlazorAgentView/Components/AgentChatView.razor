@@ -1,5 +1,5 @@
 <div class="bav-chat-view @ThemeClass" style="@CssVariableStyle">
-    <SystemPromptBanner SystemPrompt="SystemPrompt" Options="Options" />
+    <SystemPromptBanner SystemPrompt="@SystemPrompt" Options="Options" />
 
     <div class="bav-messages-container" @ref="_messagesRef">
         @if (Options.EnableVirtualization)

@@ -32,4 +32,11 @@ public class AgentChatOptions
     /// Defaults to <c>false</c> (plain pre-formatted text).
     /// </summary>
     public bool SystemPromptMarkdown { get; set; } = false;
+
+    /// <summary>
+    /// When <c>false</c> the system-prompt banner is hidden even when a
+    /// <c>SystemPrompt</c> value is supplied.
+    /// Defaults to <c>true</c>.
+    /// </summary>
+    public bool ShowSystemPromptBanner { get; set; } = true;
 }

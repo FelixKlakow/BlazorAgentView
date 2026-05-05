@@ -22,6 +22,7 @@ A Blazor component library for rendering AI agent chat interfaces with first-cla
 - [ChatMessage API](#chatmessage-api)
 - [ToolCall API](#toolcall-api)
 - [Tool call display modes](#tool-call-display-modes)
+- [Tool call type icons](#tool-call-type-icons)
 - [Per-message customisation](#per-message-customisation)
 - [Images & video in messages](#images--video-in-messages)
 - [Custom tool output renderer](#custom-tool-output-renderer)
@@ -29,13 +30,16 @@ A Blazor component library for rendering AI agent chat interfaces with first-cla
 - [Theming with CSS variables](#theming-with-css-variables)
 - [Streaming messages](#streaming-messages)
 - [AgentChatView imperative API](#agentchatview-imperative-api)
+- [Changelog](#changelog)
 
 ---
 
 ## Features
 
 - 💬 **Chat bubbles** — user bubbles, borderless agent messages (GitHub Copilot-style), collapsible system-prompt banner
-- 🔧 **Tool call cards** — 4 display modes (collapsible, expanded, header-only, always-open), per-tool override, cancel button, animated state icons (pending / running / success / failed / cancelled)
+- 🔧 **Tool call cards** — 4 display modes (collapsible, expanded, header-only, always-open), per-tool override, cancel button, animated state icons (pending / running / success / failed / cancelled), custom type icons
+- 🏷️ **Tool subtitles** — optional secondary text rendered next to the tool name in a lighter style for a quick, at-a-glance summary (e.g. the file path or search query)
+- 🚫 **Hide system-prompt banner** — disable the banner independently via `ShowSystemPromptBanner = false` while keeping the `SystemPrompt` value available to your code
 - ✍️ **Markdown** — rendered via [Markdig](https://github.com/xoofx/markdig); fenced code blocks, tables, blockquotes, inline images — swappable via `IMarkdownRenderer`
 - 📡 **Streaming** — animated typing indicator; append tokens incrementally via `AppendToMessage`
 - 🌙 **Dark mode** — `Theme = "dark"` or customise every colour via CSS variables
@@ -109,6 +113,7 @@ Pass an `AgentChatOptions` instance to the `Options` parameter.
 | `ShowTimestamps` | `bool` | `true` | Show `HH:mm` in every message header. Overridable per message via `ChatMessage.ShowTimestamp`. |
 | `EnableMarkdown` | `bool` | `true` | Render message content as Markdown. |
 | `SystemPromptMarkdown` | `bool` | `false` | Render the system-prompt banner text as Markdown. |
+| `ShowSystemPromptBanner` | `bool` | `true` | Set to `false` to hide the system-prompt banner entirely, even when `SystemPrompt` is provided. |
 | `EnableAssistantBubble` | `bool` | `false` | `false` = borderless agent messages (default). `true` = coloured bubble. |
 | `AutoScroll` | `bool` | `true` | Scroll to bottom when new messages arrive. |
 | `EnableVirtualization` | `bool` | `false` | Virtualise the message list for long histories. |
@@ -124,6 +129,7 @@ Pass an `AgentChatOptions` instance to the `Options` parameter.
                    ShowTimestamps        = true,
                    EnableMarkdown        = true,
                    SystemPromptMarkdown  = true,
+                   ShowSystemPromptBanner = false,
                    EnableAssistantBubble = false,
                    ToolCallDisplay       = ToolCallDisplayMode.Collapsible,
                    Theme                 = "dark"
@@ -183,12 +189,22 @@ public class ToolCall
 {
     public string               Id            { get; set; }  // auto-generated
     public string               ToolName      { get; set; }
+    public string?              Subtitle      { get; set; }  // optional secondary text beside the tool name
     public string?              Input         { get; set; }
     public string?              Output        { get; set; }
     public ToolState            State         { get; set; }  // Pending | Running | Success | Failed | Cancelled
     public ToolCallDisplayMode? DisplayMode   { get; set; }  // per-tool override; null = global
     public RenderFragment?      CustomContent { get; set; }  // replaces default I/O rendering
+    public RenderFragment?      Icon          { get; set; }  // optional right-side type indicator icon
 }
+```
+
+`Subtitle` is rendered next to the tool name with visual distance and a muted, lighter style — ideal for surfacing a brief, at-a-glance summary such as the file path, search query, or a key result:
+
+```csharp
+new ToolCall { ToolName = "read_file",      Subtitle = "src/main.py",  State = ToolState.Success }
+new ToolCall { ToolName = "web_search",     Subtitle = "latest AI news 2025", State = ToolState.Success }
+new ToolCall { ToolName = "run_tests",      Subtitle = "42 passed",    State = ToolState.Success }
 ```
 
 **`ToolState` values and their indicators:**
@@ -224,6 +240,43 @@ new ToolCall { ToolName = "list_directory", DisplayMode = ToolCallDisplayMode.He
 new ToolCall { ToolName = "run_tests",      DisplayMode = ToolCallDisplayMode.CollapsibleExpanded  }
 new ToolCall { ToolName = "deploy",         DisplayMode = ToolCallDisplayMode.AlwaysExpanded       }
 ```
+
+---
+
+## Tool call type icons
+
+Each `ToolCall` can carry an optional `Icon` (`RenderFragment?`) that is rendered on the **right side** of the card header as a visual indicator of the tool type. It sits in a fixed 18×18 slot after the spacer and before the cancel/chevron controls. When `null` (the default), no icon is shown.
+
+```razor
+@code {
+    private RenderFragment FileIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round">
+            <path d="M3 1h7l4 4v10H3V1z" />
+            <path d="M10 1v4h4" />
+        </svg>;
+
+    private RenderFragment SearchIcon =>
+        @<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
+            <circle cx="6.5" cy="6.5" r="4" />
+            <path d="M11 11l3 3" />
+        </svg>;
+
+    private List<ChatMessage> _messages = new()
+    {
+        new ChatMessage
+        {
+            Role = MessageRole.Assistant,
+            ToolCalls = new()
+            {
+                new ToolCall { ToolName = "read_file",  Subtitle = "src/Program.cs",      State = ToolState.Success, Icon = FileIcon   },
+                new ToolCall { ToolName = "web_search", Subtitle = "latest AI news 2025", State = ToolState.Success, Icon = SearchIcon },
+            }
+        }
+    };
+}
+```
+
+The icon is styled with `color: var(--bav-text-muted)` by default so it blends into the card without competing with the state indicator on the left.
 
 ---
 
@@ -461,6 +514,19 @@ Options = new AgentChatOptions
 | `OnCancelTool` | `EventCallback<string>` | Fired on Cancel click — receives `ToolCall.Id` |
 | `ToolContentTemplate` | `RenderFragment<ToolCall>?` | Custom renderer for tool card body; return `null!` to use default |
 | `UserInputContent` | `RenderFragment?` | Optional footer slot for a custom input bar |
+
+---
+
+## Changelog
+
+### 1.1.0
+- **Custom tool type icons** — `ToolCall.Icon` (`RenderFragment?`) renders a custom SVG/HTML icon on the right side of the tool card header as a visual type indicator for the tool call type.
+- **`Subtitle` on `ToolCall`** — optional secondary text displayed next to the tool name for at-a-glance summaries (file path, search query, etc.).
+- **`ShowSystemPromptBanner` option** — hide the system-prompt banner independently via `AgentChatOptions.ShowSystemPromptBanner = false`.
+- **Per-tool `DisplayMode` override** — each `ToolCall` can now override the global `AgentChatOptions.ToolCallDisplay`.
+
+### 1.0.0
+- Initial release: `<AgentChatView>` component, tool call cards, Markdown rendering, streaming, dark mode, CSS variable theming, virtualisation.
 
 ---
 
