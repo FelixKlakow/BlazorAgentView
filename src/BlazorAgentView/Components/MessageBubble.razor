@@ -14,27 +14,30 @@
             }
         </div>
     }
-    <div class="@BubbleClass">
-        @if (Message.CustomContent != null)
-        {
-            @Message.CustomContent
-        }
-        else if (Options.EnableMarkdown && !string.IsNullOrEmpty(Message.Content))
-        {
-            <div class="bav-markdown-content">@Renderer.Render(Message.Content)</div>
-        }
-        else if (!string.IsNullOrEmpty(Message.Content))
-        {
-            <div class="bav-text-content">@Message.Content</div>
-        }
+    @if (HasBubbleContent)
+    {
+        <div class="@BubbleClass">
+            @if (Message.CustomContent != null)
+            {
+                @Message.CustomContent
+            }
+            else if (Options.EnableMarkdown && !string.IsNullOrEmpty(Message.Content))
+            {
+                <div class="bav-markdown-content">@Renderer.Render(Message.Content)</div>
+            }
+            else if (!string.IsNullOrEmpty(Message.Content))
+            {
+                <div class="bav-text-content">@Message.Content</div>
+            }
 
-        @if (Message.IsStreaming)
-        {
-            <span class="bav-streaming-indicator">
-                <span class="bav-dot"></span><span class="bav-dot"></span><span class="bav-dot"></span>
-            </span>
-        }
-    </div>
+            @if (Message.IsStreaming)
+            {
+                <span class="bav-streaming-indicator">
+                    <span class="bav-dot"></span><span class="bav-dot"></span><span class="bav-dot"></span>
+                </span>
+            }
+        </div>
+    }
     @foreach (var toolCall in Message.ToolCalls)
     {
         <ToolCallView ToolCall="toolCall" OnCancelTool="OnCancelTool" ToolContentTemplate="ToolContentTemplate" Options="Options" />
@@ -55,6 +58,11 @@
         (IMarkdownRenderer?)Services.GetService(typeof(IMarkdownRenderer)) ?? _defaultRenderer;
 
     private bool IsAssistant => Message.Role == MessageRole.Assistant;
+
+    // Tool-call-only messages (empty content, no custom fragment, not streaming) would
+    // otherwise paint an empty bubble above their tool cards.
+    private bool HasBubbleContent =>
+        Message.CustomContent != null || !string.IsNullOrEmpty(Message.Content) || Message.IsStreaming;
 
     private string BubbleClass => (IsAssistant && !Options.EnableAssistantBubble)
         ? "bav-bubble-plain"
