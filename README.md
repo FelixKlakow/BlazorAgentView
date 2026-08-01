@@ -1,3 +1,7 @@
+> [!IMPORTANT]
+> **This repository has moved to [FelixKlakow/AgentView](https://github.com/FelixKlakow/AgentView)** — a monorepo hosting BlazorAgentView, BlazorAgentView.SignalR, and AgentView.Wpf.
+> The NuGet package IDs are unchanged; versions 1.2.0 / 1.0.1 and later are published from the new repository.
+
 # BlazorAgentView
 
 A Blazor component library for rendering AI agent chat interfaces with first-class tool call visualisation, Markdown support, streaming, dark mode, and full per-message customisation - all in a single `<AgentChatView>` component.
